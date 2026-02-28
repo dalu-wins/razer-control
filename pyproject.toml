@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "razer-control"
+version = "0.1.0"
+description = "A modern GTK4-frontend for openrazer"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Daniil Wins", email = "kontakt@dalu-wins.de" }
+]
+dependencies = [
+    "PyGObject",
+]
+
+[project.scripts]
+razer-control = "razer_control.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["razer_control*"]

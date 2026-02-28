@@ -1,0 +1,2 @@
+[console_scripts]
+razer-control = razer_control.main:main
