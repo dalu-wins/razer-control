@@ -14,31 +14,58 @@ class DevicePage(Adw.Bin):
         self._build_ui()
         self._load_initial_state()
         self._connect_signals()
-
     def _build_ui(self):
-        """Initialize the main layout and widgets."""
-        self.root_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
-        self.root_box.set_margin_top(20)
-        self.root_box.set_margin_bottom(20)
-        self.root_box.set_margin_start(20)
-        self.root_box.set_margin_end(20)
-        self.set_child(self.root_box)
+        """Build a structured settings page with separate rows for presets and picker."""
+        self.clamp = Adw.Clamp(maximum_size=600)
+        self.set_child(self.clamp)
 
-        # Effect selection section
-        self.root_box.append(Gtk.Label(label="Effect", xalign=0, css_classes=["heading"]))
+        # Main layout container
+        self.root_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
+        self.clamp.set_child(self.root_box)
+
+        # --- General Settings Group ---
+        self.general_group = Adw.PreferencesGroup(title="Device Settings")
+        self.root_box.append(self.general_group)
+
+        # Effect selection row
+        self.effect_row = Adw.ActionRow(title="Lighting Effect")
         self.dropdown = Gtk.DropDown.new_from_strings(self.supported_effects)
-        self.root_box.append(self.dropdown)
+        self.dropdown.set_valign(Gtk.Align.CENTER)
+        self.effect_row.add_suffix(self.dropdown)
+        self.general_group.add(self.effect_row)
 
-        # Color management section
-        self.color_group = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self.color_group.append(Gtk.Label(label="Color", xalign=0, css_classes=["heading"]))
-        
-        self.color_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        self._setup_preset_buttons()
-        self._setup_color_picker()
-        
-        self.color_group.append(self.color_controls)
+        # --- Color Management Group ---
+        self.color_group = Adw.PreferencesGroup(title="Color")
         self.root_box.append(self.color_group)
+
+        # Row 1: Quick Presets
+        self.preset_row = Adw.ActionRow(title="Quick Presets")
+        self.color_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self.color_controls.set_valign(Gtk.Align.CENTER)
+        self._setup_preset_buttons()
+        self.preset_row.add_suffix(self.color_controls)
+        self.color_group.add(self.preset_row)
+
+        # Row 2: Manual Custom Color
+        self.custom_color_row = Adw.ActionRow(title="Custom Color")
+        self._setup_color_picker() # Now adds self.color_button
+        self.color_button.set_valign(Gtk.Align.CENTER)
+        self.custom_color_row.add_suffix(self.color_button)
+        self.color_group.add(self.custom_color_row)
+
+    def _setup_color_picker(self):
+        """Initialize the color dialog button."""
+        # Removed hexpand as it's now contained within an ActionRow suffix
+        self.color_button = Gtk.ColorDialogButton(dialog=Gtk.ColorDialog())
+
+    def _update_visibility(self):
+        """Toggle the entire color group visibility."""
+        idx = self.dropdown.get_selected()
+        effect = self.supported_effects[idx] if idx != -1 else ""
+        needs_color = effect in ['static', 'breathSingle', 'reactive']
+        
+        # Shows/Hides the entire section including Presets and Custom Color
+        self.color_group.set_visible(needs_color)   
 
     def _setup_preset_buttons(self):
         """Create quick-select color buttons."""
@@ -53,13 +80,6 @@ class DevicePage(Adw.Bin):
             btn.set_child(dot)
             btn.connect("clicked", self._on_preset_clicked, rgba)
             self.color_controls.append(btn)
-
-    def _setup_color_picker(self):
-        """Setup the main color dialog button to fill remaining width."""
-        self.color_button = Gtk.ColorDialogButton(dialog=Gtk.ColorDialog())
-        self.color_button.set_hexpand(True)
-        self.color_button.set_halign(Gtk.Align.FILL)
-        self.color_controls.append(self.color_button)
 
     def _apply_widget_color(self, widget, hex_color):
         """Apply background color to a widget using CSS."""
@@ -88,13 +108,6 @@ class DevicePage(Adw.Bin):
         """Attach hardware update callbacks."""
         self.dropdown.connect("notify::selected", self._on_ui_changed)
         self.color_button.connect("notify::rgba", self._on_ui_changed)
-
-    def _update_visibility(self):
-        """Show/hide color controls based on selected effect."""
-        idx = self.dropdown.get_selected()
-        effect = self.supported_effects[idx] if idx != -1 else ""
-        needs_color = effect in ['static', 'breathSingle', 'reactive']
-        self.color_group.set_visible(needs_color)
 
     def _on_preset_clicked(self, _btn, rgba):
         """Handle preset selection by updating the main picker."""
