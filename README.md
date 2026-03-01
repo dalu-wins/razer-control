@@ -8,13 +8,13 @@ Clean frontend for openrazer using libadwaita and gtk4.
 * Color Settings
 * Brightness Setting
 
+### Tested Devices
+
+* Razer Huntsman V3 Pro
+
 ### Prerequisites
 
 Before installing, ensure you have the OpenRazer daemon installed and your user is part of the `plugdev` group.
 
 * **OpenRazer**
 * **Python**
-
-### Tested Devices
-
-* Razer Huntsman V3 Pro
