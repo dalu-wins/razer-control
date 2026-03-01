@@ -8,7 +8,6 @@ class RazerManager:
     
     def __init__(self):
         self.devices = []
-        # Map UI display names to internal OpenRazer capability keys
         self._cap_map = {
             'breathSingle': 'breath_single',
             'breathRandom': 'breath_random',
@@ -25,30 +24,44 @@ class RazerManager:
         if not target_dev: return None
         
         fx = target_dev['fx']
+        raw_device = target_dev['raw'] # Zugriff auf das echte Device-Objekt
         try:
             rgb = list(fx.colors)
-            return {'effect': fx.effect, 'r': rgb[0], 'g': rgb[1], 'b': rgb[2]}
+            return {
+                'effect': fx.effect, 
+                'r': rgb[0], 'g': rgb[1], 'b': rgb[2],
+                'brightness': raw_device.brightness # Helligkeit auslesen
+            }
         except Exception:
-            return {'effect': 'none', 'r': 0, 'g': 0, 'b': 0}
+            return {'effect': 'none', 'r': 0, 'g': 0, 'b': 0, 'brightness': 100}
         
     def re_scan(self):
         """Re-initialize the device list from the hardware daemon."""
         try:
-            # Re-read devices from the daemon
             self._raw_manager = DeviceManager()
             self._raw_manager.sync_effects = False
             
-            # Clear internal list and re-populate
             self.devices = []
             for device in self._raw_manager.devices:
                 self.devices.append({
                     'fx': RazerFX(device.serial, device.capabilities),
+                    'raw': device, # Speichern für Brightness-Zugriff
                     'name': device.name
                 })
             
             logging.info(f"Rescan complete. Found {len(self.devices)} devices.")
         except Exception as e:
             logging.error(f"Failed to rescan Razer devices: {e}")
+
+    def set_brightness(self, value, device_serial=None):
+        """Set brightness (0-100) for a specific device or all."""
+        for dev in self.devices:
+            if device_serial and dev['fx']._serial != device_serial:
+                continue
+            try:
+                dev['raw'].brightness = value
+            except Exception as e:
+                logging.error(f"Could not set brightness for {dev['name']}: {e}")
 
     def set_effect(self, name, r=0, g=0, b=0, device_serial=None):
         """Apply effect to a specific device or all if serial is None."""
@@ -74,7 +87,6 @@ class RazerManager:
         supported = set()
 
         for dev in self.devices:
-            # Filter by serial if provided
             if device_serial and dev['fx']._serial != device_serial:
                 continue
                 
