@@ -73,14 +73,23 @@ class DefaultGroup(Adw.PreferencesGroup):
         if idx == -1: return
         
         effect = self.supported_effects[idx]
-        self.manager.set_effect(effect, device_serial=self.serial)
+
+        state = self.manager.get_current_state(device_serial=self.serial)
+
+
+        if state and not (state['r'] == 0 and state['g'] == 0 and state['b'] == 0):
+            self.manager.set_effect(effect, device_serial=self.serial, r=state['r'], g=state['g'], b=state['b'])
+        else:
+            self.manager.set_effect(effect, device_serial=self.serial, r=0, g=255, b=0)
+        
+
+        self.manager.set_effect(effect, device_serial=self.serial, r=state['r'], g=state['g'], b=state['b'])
         
         if self.on_change_callback:
             self.on_change_callback(effect)
 
     def _on_brightness_changed(self, scale):
         val = int(scale.get_value())
-        # Setzt nur die Helligkeit, ohne den Effekt zu ändern
         self.manager.set_brightness(val, device_serial=self.serial)
         self.brightness_label.set_text(f"{val}%")
 

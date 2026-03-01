@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, Gdk
 
 from razer_control.ui.components.colors_group import ColorGroup
 from razer_control.ui.components.general_group import DefaultGroup
@@ -39,11 +39,10 @@ class DevicePage(Adw.Bin):
 
     def _update_visibility(self, effect=None):
         """Verwendet den übergebenen Effekt oder liest ihn aus der Gruppe."""
-        # Falls beim Init aufgerufen und general_group noch nicht zugewiesen:
         if effect is None:
             if not hasattr(self, "general_group"):
                 return
             effect = self.general_group.get_current_effect()
-            
+                        
         needs_color = effect in ['static', 'breathSingle', 'reactive']
         self.color_group.set_visible(needs_color)
