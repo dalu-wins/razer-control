@@ -28,9 +28,10 @@ class DefaultGroup(Adw.PreferencesGroup):
         # Container für Label + Scale
         brightness_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         
-        # Wert-Anzeige (links)
+        # Wert-Anzeige (rechts)
         self.brightness_label = Gtk.Label(label="100%")
         self.brightness_label.set_size_request(40, -1) # Fixe Breite verhindert Springen der Skala
+
         
         # Scale: 0 bis 100
         self.brightness_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
@@ -38,8 +39,8 @@ class DefaultGroup(Adw.PreferencesGroup):
         self.brightness_scale.set_valign(Gtk.Align.CENTER)
         self.brightness_scale.set_draw_value(False) # Deaktiviert den Standard-Value oben drüber
         
-        brightness_box.append(self.brightness_label)
         brightness_box.append(self.brightness_scale)
+        brightness_box.append(self.brightness_label)
         
         self.brightness_row.add_suffix(brightness_box)
         self.add(self.brightness_row)
