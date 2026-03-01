@@ -8,11 +8,11 @@ from gi.repository import Adw
 from .ui.window import MainWindow
 from .core.razer_manager import RazerManager
 
-class FrazerApp(Adw.Application):
+class RazerControlApp(Adw.Application):
     """Main Application class for Razer Control."""
     
     def __init__(self):
-        super().__init__(application_id="de.dalu-wins.razer-control")
+        super().__init__(application_id='de.dalu_wins.RazerControl')
         self.razer_manager = None
         self.window = None
 
@@ -29,5 +29,5 @@ class FrazerApp(Adw.Application):
 
 def main():
     """Entry point for the application."""
-    app = FrazerApp()
+    app = RazerControlApp()
     return app.run(sys.argv)

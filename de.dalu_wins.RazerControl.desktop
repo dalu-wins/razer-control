@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Razer Control
+Comment=Modern GTK4-frontend for openrazer
+Exec=razer-control
+Icon=input-gaming
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=Razer;RGB;Lighting;
